@@ -70,8 +70,8 @@ class BackendsPool(object):
         url_namespace = getattr(backend_instance, 'url_namespace', "")
         if not url_namespace:
             raise NotImplementedError(
-                'Please set a namespace for backend "%s"' %
-                    backend_instance.backend_name)
+                'Please set a namespace for backend "%s"'
+                % backend_instance.backend_name)
 
     def _load_backends_list(self, setting_name, shop_object):
         """ This actually loads the backends from disk"""
@@ -97,4 +97,8 @@ class BackendsPool(object):
         return result
 
 
-backends_pool = BackendsPool()
+BACKENDS_POOL = getattr(
+    settings, 'SHOP_BACKENDS_POOL', 'shop.backends_pool.BackendsPool')
+BackendsPoolClass = load_class(BACKENDS_POOL, 'SHOP_BACKENDS_POOL')
+
+backends_pool = BackendsPoolClass()
