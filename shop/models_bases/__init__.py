@@ -14,13 +14,14 @@ import django
 
 USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
+
 #==============================================================================
 # Product
 #==============================================================================
 class BaseProduct(PolymorphicModel):
     """
     A basic product for the shop.
-    
+
     Most of the already existing fields here should be generic enough to reside
     on the "base model" and not on an added property.
     """
@@ -46,11 +47,13 @@ class BaseProduct(PolymorphicModel):
     def get_absolute_url(self):
         return reverse('product_detail', args=[self.slug])
 
-    def get_price(self):
+    def get_unit_price(self, **kwargs):
         """
         Returns the price for this item (provided for extensibility).
         """
         return self.unit_price
+
+    get_price = get_unit_price   # backwards compatibility, deprecated
 
     def get_name(self):
         """
@@ -74,9 +77,9 @@ class BaseProduct(PolymorphicModel):
 #==============================================================================
 class BaseCart(models.Model):
     """
-    This should be a rather simple list of items. 
-    
-    Ideally it should be bound to a session and not to a User is we want to let 
+    This should be a rather simple list of items.
+
+    Ideally it should be bound to a session and not to a User is we want to let
     people buy from our shop without having to register with us.
     """
     # If the user is null, that means this is used for a session
@@ -176,8 +179,8 @@ class BaseCart(models.Model):
 
     def delete_item(self, cart_item_id):
         """
-        A simple convenience method to delete one of the cart's items. 
-        
+        A simple convenience method to delete one of the cart's items.
+
         This allows to implicitely check for "access rights" since we insure the
         cartitem is actually in the user's cart.
         """
@@ -198,7 +201,7 @@ class BaseCart(models.Model):
         """
         This should be called whenever anything is changed in the cart (added
         or removed).
-        
+
         It will loop on all line items in the cart, and call all the price
         modifiers on each row.
         After doing this, it will compute and update the order's total and
@@ -302,9 +305,21 @@ class BaseCartItem(models.Model):
         self.line_total = Decimal('0.0')
         self.current_total = Decimal('0.0')  # Used by cart modifiers
 
+    def get_base_unit_price(self, **kwargs):
+        """
+        Returns products price (provided for extensibility).
+        """
+        return self.product.get_price(**kwargs)
+
+    def get_base_line_subtotal(self, request):
+        """
+        Returns base line subtotal (product_unit_price * self.quantity)
+        """
+        return self.get_base_unit_price(request=request) * self.quantity
+
     def update(self, request):
         self.extra_price_fields = []  # Reset the price fields
-        self.line_subtotal = self.product.get_price() * self.quantity
+        self.line_subtotal = self.get_base_line_subtotal(request)
         self.current_total = self.line_subtotal
 
         for modifier in cart_modifiers_pool.get_modifiers_list():
