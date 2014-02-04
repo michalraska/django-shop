@@ -46,7 +46,7 @@ class BaseProduct(PolymorphicModel):
     def get_absolute_url(self):
         return reverse('product_detail', args=[self.slug])
 
-    def get_unit_price(self, **kwargs):
+    def get_unit_price(self):
         """
         Returns the price for this item (provided for extensibility).
         """
@@ -308,7 +308,7 @@ class BaseCartItem(models.Model):
         """
         Returns products price (provided for extensibility).
         """
-        return self.product.get_price(**kwargs)
+        return self.product.get_price()
 
     def get_base_line_subtotal(self, request):
         """
