@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from shop.models_bases import BaseProduct
 from shop.models_bases.managers import (
@@ -8,6 +9,8 @@ from shop.models_bases.managers import (
 
 
 class Product(BaseProduct):
+    slug = models.SlugField(verbose_name=_('Slug'), unique=True)
+
     objects = ProductManager()
     statistics = ProductStatisticsManager()
 
