@@ -52,7 +52,8 @@ class BaseProduct(PolymorphicModel):
         """
         return self.unit_price
 
-    get_price = get_unit_price   # backwards compatibility, deprecated
+    def get_price(self):
+        return self.get_unit_price()  # backwards compatibility, deprecated
 
     def get_name(self):
         """
