@@ -354,13 +354,15 @@ class BaseOrder(models.Model):
 
     PAYMENT = 30  # DEPRECATED!
 
-    STATUS_CODES = (
-        (PROCESSING, _('Processing')),
-        (CONFIRMING, _('Confirming')),
-        (CONFIRMED, _('Confirmed')),
-        (COMPLETED, _('Completed')),
-        (SHIPPED, _('Shipped')),
-        (CANCELED, _('Canceled')),
+    STATUS_CODES = getattr(
+        settings, 'ORDER_STATUS_CODES', (
+            (PROCESSING, _('Processing')),
+            (CONFIRMING, _('Confirming')),
+            (CONFIRMED, _('Confirmed')),
+            (COMPLETED, _('Completed')),
+            (SHIPPED, _('Shipped')),
+            (CANCELED, _('Canceled')),
+        )
     )
 
     # If the user is null, the order was created with a session
